@@ -36,7 +36,7 @@ if (!STORE || !TOKEN) {
   process.exit(1);
 }
 
-const API_VERSION = '2024-01';
+const API_VERSION = '2025-10';
 const BASE = `https://${STORE}/admin/api/${API_VERSION}`;
 const HEADERS = { 'X-Shopify-Access-Token': TOKEN, 'Content-Type': 'application/json' };
 
