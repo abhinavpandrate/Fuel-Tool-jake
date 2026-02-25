@@ -1,0 +1,110 @@
+<!--
+  STYRKR Fuel Tool — Recharge Integration HTML Snippets
+  ──────────────────────────────────────────────────────
+  Two changes to make in index.html:
+    1. Add subscribe toggle to the Bundle Builder section
+    2. Update the script loading order at the bottom of <body>
+-->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SNIPPET 1: Subscribe toggle                                            -->
+<!-- Add this INSIDE #bundleForm, after the existing bundleDiscount toggle  -->
+<!-- (currently around line 292 of index.html)                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<!--
+  REPLACE the existing discount+CTA block:
+
+      <div class="inlineRow">
+        <label class="toggle"><input type="checkbox" id="bundleDiscount" checked /> <span>Subscribe &amp; Save (25% off)</span></label>
+      </div>
+
+  WITH:
+-->
+
+<div class="inlineRow">
+  <label class="toggle">
+    <input type="checkbox" id="bundleDiscount" checked />
+    <span>Subscribe &amp; Save (25% off)</span>
+  </label>
+  <label class="toggle" style="margin-left: var(--s-4);">
+    <input type="checkbox" id="bundleSubscribe" checked />
+    <span>Add as subscription <span class="muted">(via Recharge)</span></span>
+  </label>
+</div>
+
+<!--
+  The bundleSubscribe checkbox drives state.bundle.subscribe in app.js.
+  When checked → selling_plan is sent in the cart add call (subscribe & save).
+  When unchecked → one-time purchase (no selling_plan).
+  The bundleDiscount checkbox still controls the pricing display in the UI.
+-->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SNIPPET 2: Script loading order                                        -->
+<!-- Replace the <script> tags at the bottom of <body>                     -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<!--
+  REPLACE:
+      <script src="assets/data.js"></script>
+      <script src="assets/app.js"></script>
+
+  WITH:
+-->
+
+<!-- 1. Product + pack data (must be first) -->
+<script src="assets/data.js"></script>
+
+<!-- 2. Shopify variant IDs + Recharge IDs (fill in before deploying) -->
+<script src="assets/variant_map.js"></script>
+
+<!-- 3. Recharge checkout module (depends on variant_map + window.recharge SDK) -->
+<!--    window.recharge is injected by the Recharge Shopify theme extension.  -->
+<!--    In local/dev mode this script silently no-ops if recharge is absent.  -->
+<script src="assets/recharge_checkout.js"></script>
+
+<!-- 4. Fuel tool UI + calculation engine (depends on all of the above) -->
+<script src="assets/app.js"></script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SNIPPET 3: Optional status element on BYOB page                       -->
+<!-- Add to your Shopify BYOB product page template if using express mode  -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div
+  data-styrkr-prefill-status
+  style="display:none; padding: 12px 16px; background: rgba(77,205,198,0.10); border: 1px solid rgba(77,205,198,0.40); border-radius: 10px; font-size: 13px; margin: 12px 0;"
+></div>
+<!-- The prefill bridge will show its status messages here if this element exists -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SNIPPET 4: BYOB page script loading (Shopify theme file)              -->
+<!-- Add to the build-your-own-bundle product template in your Shopify     -->
+<!-- theme, AFTER the Recharge theme extension script block                -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<!--
+  In your Shopify theme (product.build-your-own-bundle.liquid or similar):
+
+  {% if product.handle == 'build-your-own-bundle' %}
+    <script src="{{ 'data.js' | asset_url }}" defer></script>
+    <script src="{{ 'variant_map.js' | asset_url }}" defer></script>
+    <script src="{{ 'recharge_checkout.js' | asset_url }}" defer></script>
+    <script src="{{ 'prefill_bridge_byob.js' | asset_url }}" defer></script>
+  {% endif %}
+
+  OR if you want express mode (skips widget UI, goes straight to cart):
+
+  {% if product.handle == 'build-your-own-bundle' %}
+    <script>window.STYRKR_PREFILL_MODE = 'express';</script>
+    <script src="{{ 'data.js' | asset_url }}" defer></script>
+    <script src="{{ 'variant_map.js' | asset_url }}" defer></script>
+    <script src="{{ 'recharge_checkout.js' | asset_url }}" defer></script>
+    <script src="{{ 'prefill_bridge_byob.js' | asset_url }}" defer></script>
+  {% endif %}
+-->

@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>STYRKR Fuel Tool (Prototype UI)</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="theme-dark">
+  <!-- V4: stripped back minimal UI (no decorative mesh) -->
+
+  <header class="hero">
+    <div class="hero__grid">
+      <div class="brand">
+        <div class="brand__logo">STYRKR</div>
+        <div class="brand__meta">
+          <span>Fuel Tool</span>
+          <span class="dot">•</span>
+          <span>Carbs / Fluids / Sodium</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero__bar">
+      <div class="nav" role="tablist" aria-label="Tool views">
+        <button class="nav__btn is-active" data-view="planner" role="tab" aria-selected="true">Planner</button>
+        <button class="nav__btn" data-view="bundle" role="tab" aria-selected="false">Bundle Builder</button>
+        <button class="nav__btn" data-view="faqs" role="tab" aria-selected="false">Notes</button>
+      </div>
+
+      <div class="hero__actions">
+        <button class="btn btn--ghost" id="themeToggle" type="button" title="Toggle dark/light">Light mode</button>
+        <a class="btn btn--solid" href="https://styrkr.com/collections/bundle-builder" target="_blank" rel="noreferrer">Shop bundles</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- PLANNER -->
+    <section class="view is-active" id="view-planner" role="tabpanel">
+      <div class="toolGrid">
+        <!-- Left: Inputs -->
+        <div class="panel">
+          <div class="panel__head">
+            <h2>Inputs</h2>
+
+            <div class="stepper" aria-label="Planner steps">
+              <button class="step is-active" data-step="0" type="button"><span>1</span> Session</button>
+              <button class="step" data-step="1" type="button"><span>2</span> Sweat</button>
+              <button class="step" data-step="2" type="button"><span>3</span> Fuel</button>
+              <button class="step" data-step="3" type="button"><span>4</span> Output</button>
+              <button class="step" data-step="4" type="button"><span>5</span> Details</button>
+            </div>
+          </div>
+
+          <div class="panel__body">
+            <form id="plannerForm">
+              <!-- Step 1 -->
+              <div class="stepPane is-active" data-step="0">
+                <div class="formGrid">
+                  <div class="row2">
+                    <div class="field">
+                      <label for="activity">Activity</label>
+                      <select id="activity"></select>
+                      <div class="help">Affects carb demand via an activity multiplier.</div>
+                    </div>
+
+                    <div class="field">
+                      <label for="durationH">Duration (hours)</label>
+                      <input id="durationH" class="input" type="number" min="0.25" step="0.25" value="3" />
+                      <div class="help">Use decimals (e.g., 2.5 = 2h 30m).</div>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="rpe">Intensity (RPE 1–10)</label>
+                    <div class="rangeRow">
+                      <input id="rpe" type="range" min="1" max="10" step="0.5" value="6" />
+                      <span class="pill"><span>RPE</span> <strong id="rpeVal">6.0</strong></span>
+                    </div>
+                    <div class="help">Used to scale carb and fluid targets. Be honest: it changes the plan.</div>
+                  </div>
+
+                  <div class="field">
+                    <label for="conditions">Conditions</label>
+                    <select id="conditions"></select>
+                    <div class="help">Used to adjust fluid target (ml/h).</div>
+                  </div>
+
+                  <div class="field">
+                    <label for="bottleSizeMl">Bottle size (ml)</label>
+                    <select id="bottleSizeMl"></select>
+                    <div class="help">Used for bottle guidance (when enabled). Keep as your usual bottle/flask size.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="stepPane" data-step="1">
+                <div class="formGrid">
+                  <div class="field">
+                    <label for="sweatRate">Sweat rate category</label>
+                    <select id="sweatRate"></select>
+                    <div class="help">If you have lab data, use that in the next version. For now, choose the best fit.</div>
+                  </div>
+
+                  <div class="field">
+                    <label for="sweatSalt">Sweat saltiness</label>
+                    <select id="sweatSalt"></select>
+                    <div class="help">Estimates sodium concentration in sweat (mg/L).</div>
+                  </div>
+
+                  <div class="field">
+                    <label for="sodiumRepl">Sodium replacement factor</label>
+                    <div class="rangeRow">
+                      <input id="sodiumRepl" type="range" min="0.30" max="0.80" step="0.05" value="0.50" />
+                      <span class="pill"><span>Replace</span> <strong id="sodiumReplVal">0.50</strong></span>
+                    </div>
+                    <div class="help">Fraction of sodium loss to replace. Most athletes land ~0.4–0.7.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="stepPane" data-step="2">
+                <div class="formGrid">
+                  <div class="row2">
+                    <div class="field">
+                      <label for="carbMode">Carb mode</label>
+                      <select id="carbMode"></select>
+                      <div class="help"><span class="kbd">Standard</span> caps at 90 g/h. <span class="kbd">Advanced</span> allows 120 g/h (gut‑trained).</div>
+                    </div>
+
+                    <div class="field">
+                      <label for="caffeineProtocol">Caffeine protocol</label>
+                      <select id="caffeineProtocol"></select>
+                      <div class="help">Sets the % of your gels/drinks that are caffeinated (or choose Custom).</div>
+                    </div>
+                  </div>
+
+                  <div class="field" id="caffeineCustomWrap" style="display:none;">
+                    <label for="caffeineCustom">Custom caffeine fraction</label>
+                    <div class="rangeRow">
+                      <input id="caffeineCustom" type="range" min="0" max="0.75" step="0.05" value="0.25" />
+                      <span class="pill"><span>Fraction</span> <strong id="caffeineCustomVal">0.25</strong></span>
+                    </div>
+                    <div class="help">0.25 ≈ “some”, 0.50 ≈ “high”.</div>
+                  </div>
+
+                  <div class="field">
+                    <label>Preference: bars / gels / mixes / balanced</label>
+                    <div class="choiceGrid" id="planStyleGrid"></div>
+                    <div class="help">This controls the split of carbs across drinks vs gels vs bars.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="stepPane" data-step="3">
+                <div class="formGrid">
+                  <div class="field">
+                    <label>What you’ll get</label>
+                    <div class="help">
+                      The right panel shows: (1) per‑hour targets, (2) a product plan by style, and (3) a bundle builder shopping list with pack pricing.
+                      If anything looks off, go back a step and adjust.
+                    </div>
+                  </div>
+
+                  <div class="notice">
+                    <strong>Quick check:</strong> practise this plan in training before race day. Don’t overdrink (hyponatremia risk),
+                    and don’t push 120 g/h without gut training.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 5 (lead capture / unlock) -->
+              <div class="stepPane" data-step="4">
+                <div class="formGrid">
+                  <div class="notice">
+                    Enter your <strong>name</strong> and <strong>email</strong> to unlock the full plan summary
+                    and the bundle builder tab.
+                  </div>
+
+                  <div class="row2">
+                    <div class="field">
+                      <label for="leadName">Name</label>
+                      <input id="leadName" class="input" type="text" autocomplete="name" placeholder="Your name" />
+                    </div>
+                    <div class="field">
+                      <label for="leadEmail">Email</label>
+                      <input id="leadEmail" class="input" type="email" autocomplete="email" placeholder="you@domain.com" />
+                    </div>
+                  </div>
+
+                  <div id="leadError" class="notice notice--warn" style="display:none;"></div>
+
+                  <div class="help">
+                    Prototype behaviour: details are stored locally in your browser to unlock the tool.
+                    When hosted, this step can be wired to your email capture endpoint.
+                  </div>
+                </div>
+              </div>
+
+              <div class="formActions">
+                <button class="btn btn--ghost" id="prevBtn" type="button">Back</button>
+                <button class="btn btn--solid" id="nextBtn" type="button">Next</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right: Outputs -->
+        <div class="panel panel--sticky">
+          <div class="panel__head">
+            <h2>Plan summary</h2>
+            <div class="pill" title="All calculations are client-side">
+              <span>Engine</span> <strong class="mono">local</strong>
+            </div>
+          </div>
+
+          <!-- Locked wrapper (blur until Step 5 details are captured) -->
+          <div class="planLock is-locked" id="planLock">
+            <div class="planLock__content" id="planLockContent">
+              <div class="summaryCards" id="summaryCards"></div>
+
+              <div class="section">
+                <h3>Recommended products</h3>
+                <div id="productPlan"></div>
+                <div id="productNotes" class="notice" style="display:none;"></div>
+              </div>
+
+              <div class="section small">
+                <p class="muted">
+                  Data source: internal spreadsheet (<span class="mono">Fueltool + bundle Builder v2.xlsx</span>). Pack prices shown in GBP (£).
+                </p>
+              </div>
+            </div>
+
+            <div class="planLock__overlay" id="planLockOverlay" aria-hidden="false">
+              <div class="planLock__card">
+                <div class="planLock__title">Unlock your plan</div>
+                <div class="planLock__text">
+                  Complete <strong>Step 5</strong> (name + email) to view the full plan summary and unlock other tabs.
+                </div>
+                <button class="btn btn--solid" id="goToDetailsBtn" type="button">Go to Step 5</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- BUNDLE BUILDER -->
+    <section class="view" id="view-bundle" role="tabpanel">
+      <div class="toolGrid">
+        <div class="panel">
+          <div class="panel__head">
+            <h2>30‑day fueling drops</h2>
+            <div class="pill"><span>Uses</span> <strong class="mono">per‑hour plan</strong></div>
+          </div>
+
+          <div class="panel__body">
+            <form id="bundleForm">
+              <div class="formGrid">
+                <div class="row2">
+                  <div class="field">
+                    <label for="sessions30d">Sessions per 30 days</label>
+                    <input id="sessions30d" class="input" type="number" min="0" step="1" value="8" />
+                    <div class="help">How many sessions you do in a typical 30‑day block.</div>
+                  </div>
+
+                  <div class="field">
+                    <label for="avgSessionH">Avg session duration (hours)</label>
+                    <input id="avgSessionH" class="input" type="number" min="0.25" step="0.25" value="1.5" />
+                    <div class="help">Average length of those sessions.</div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="fuelledPct">Fuelled sessions %</label>
+                  <div class="rangeRow">
+                    <input id="fuelledPct" type="range" min="0" max="1" step="0.05" value="0.75" />
+                    <span class="pill"><span>Fuelled</span> <strong id="fuelledPctVal">0.75</strong></span>
+                  </div>
+                  <div class="help">Not every session needs full fueling. This scales your monthly bundle.</div>
+                </div>
+
+                <div class="notice">
+                  Defaults pull from your <strong>Planner</strong> settings (carb target, sodium target, caffeine, plan style).
+                  Switch back to Planner to change those.
+                </div>
+
+                <div class="inlineRow">
+                  <label class="toggle"><input type="checkbox" id="bundleDiscount" checked /> <span>Subscribe &amp; Save (25% off)</span></label>
+                </div>
+
+                <div id="bundle30Out"></div>
+              <div class="inlineRow" style="margin-top: var(--s-4); gap: var(--s-2); flex-wrap: wrap;">
+                <a class="btn btn--solid" id="openPrefillByobBtn30" href="https://styrkr.com/products/build-your-own-bundle" target="_blank" rel="noreferrer">Open BYOB (prefilled)</a>
+                <button class="btn btn--ghost" id="addBundleToCartBtn30" type="button">Add packs to cart</button>
+              </div>
+              <div id="bundle30CtaNote" class="notice" style="display:none; margin-top: var(--s-3);"></div>
+
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel panel--sticky">
+          <div class="panel__head">
+            <h2>30‑day order</h2>
+            <div class="pill"><span>Pricing</span> <strong class="mono">per‑unit</strong></div>
+          </div>
+
+          <div class="section" style="padding-top: var(--s-4);">
+            <h3>Drops &amp; packs</h3>
+            <div id="bundle30Packs"></div>
+            <div id="bundle30Notes" class="notice" style="display:none;"></div>
+          </div>
+
+          <div class="section small">
+            <p class="muted">Tip: If you don’t meet the 4‑item minimum, switch to a more varied plan style (Balanced / Adventure).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTES / FAQ -->
+    <section class="view" id="view-faqs" role="tabpanel">
+      <div class="panel">
+        <div class="panel__head">
+          <h2>Notes</h2>
+        </div>
+        <div class="panel__body">
+          <div class="formGrid">
+            <div class="notice">
+              <strong>Disclaimer:</strong> This tool provides planning estimates (not medical advice). Validate in training and adjust for
+              temperature, altitude, gut tolerance, and race logistics.
+            </div>
+
+            <div class="field">
+              <label>Model transparency</label>
+              <div class="help">
+                Targets and product splits are driven by lookup tables and formulas in the spreadsheet you supplied. The planner:
+                <ul>
+                  <li>Sets a carb target (g/h) from <span class="kbd">duration band</span> × <span class="kbd">RPE factor</span> × <span class="kbd">activity multiplier</span>, capped by carb mode.</li>
+                  <li>Sets a fluid target (ml/h) from <span class="kbd">sweat category</span> + <span class="kbd">conditions adj</span> + <span class="kbd">RPE adj</span>, clamped to 300–1200 ml/h.</li>
+                  <li>Sets a sodium target (mg/h) from fluid × sweat sodium × sodium replacement factor.</li>
+                  <li>Builds a product plan from your selected style (mix/drink/gel/bar/balanced) and caffeine protocol.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Next build ideas</label>
+              <div class="help">
+                If you want to take this from prototype UI to production, sensible next iterations:
+                <ul>
+                  <li>Measured sweat rate &amp; sweat sodium inputs (lab or field test) with confidence ranges.</li>
+                  <li>Time‑based schedule output (every 15–30 min) + “carry plan” for pockets/bottles.</li>
+                  <li>Checkout integration for bundle builder SKUs.</li>
+                  <li>Multi‑currency + region pack/pricing tables.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

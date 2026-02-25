@@ -1,0 +1,12 @@
+{
+  "name": "styrkr-fuel-tool",
+  "version": "4.1.0",
+  "description": "STYRKR Fuel Tool — personalised nutrition planner with Recharge subscription bundle integration",
+  "type": "module",
+  "scripts": {
+    "populate-variants": "node scripts/populate_variant_map.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
