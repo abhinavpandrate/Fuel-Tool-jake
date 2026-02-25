@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /**
  * STYRKR — Auto-populate variant_map.js
- * ──────────────────────────────────────
  * Usage:
  *   SHOPIFY_STORE=styrkr.myshopify.com \
  *   SHOPIFY_TOKEN=shpat_xxxxxxxxxxxx \
@@ -27,28 +26,41 @@ async function shopifyGet(path) {
 }
 
 const PACK_DEFS = [
-  ['MIX60_6',        'mix60-dual-carb-drink',                              '6 pack',            'byob-energy-drink-powders'],
-  ['MIX60_12',       'mix60-dual-carb-drink',                              '12 pack',           'byob-energy-drink-powders'],
-  ['MIX90_6',        'mix90-dual-carb-drink',                              '6 pack',            'byob-energy-drink-powders'],
-  ['MIX90_12',       'mix90-dual-carb-drink',                              '12 pack',           'byob-energy-drink-powders'],
-  ['MIX90_CAFF_6',   'mix90-caffeine-dual-carb-drink',                     '6 pack',            'byob-energy-drink-powders'],
-  ['MIX90_CAFF_12',  'mix90-caffeine-dual-carb-drink',                     '12 pack',           'byob-energy-drink-powders'],
-  ['MIXPLUS_15',     'byob-mix-pink-grapefruit-dual-carb-electrolyte-mix', '556g tub',          null],
-  ['MIXPLUS_25',     'byob-mix-pink-grapefruit-dual-carb-electrolyte-mix', '926g tub',          null],
+  // ── Energy drink powders (corrected handles with -copy suffix) ──
+  ['MIX60_6',        'mix60-dual-carb-energy-drink-mix-copy',              '6 pack',            'byob-energy-drink-powders'],
+  ['MIX60_12',       'mix60-dual-carb-energy-drink-mix-copy',              '12 pack',           'byob-energy-drink-powders'],
+  ['MIX90_6',        'mix90-dual-carb-energy-drink-mix-copy',              '6 pack',            'byob-energy-drink-powders'],
+  ['MIX90_12',       'mix90-dual-carb-energy-drink-mix-copy',              'Box of 12',         'byob-energy-drink-powders'],
+  ['MIX90_CAFF_6',   'byob-mix90-caffeine-dual-carb-energy-drink-mix',     '6 pack',            'byob-energy-drink-powders'],
+  ['MIX90_CAFF_12',  'byob-mix90-caffeine-dual-carb-energy-drink-mix',     '12 pack',           'byob-energy-drink-powders'],
+
+  // ── MIX+ tubs (corrected variant titles) ──
+  ['MIXPLUS_15',     'byob-mix-pink-grapefruit-dual-carb-electrolyte-mix', '556g',              'byob-energy-drink-powders'],
+  ['MIXPLUS_25',     'byob-mix-pink-grapefruit-dual-carb-electrolyte-mix', '926g',              'byob-energy-drink-powders'],
+
+  // ── Gels ──
   ['GEL30_6',        'vq-byob-gel30-dual-carb-energy-gel-1x-copy',         '6 pack',            null],
   ['GEL30_12',       'vq-byob-gel30-dual-carb-energy-gel-1x-copy',         '12 pack',           null],
   ['GEL30_CAFF_6',   'vq-byob-gel30-caffeine-energy-gel-1x-copy',          '6 pack',            null],
   ['GEL30_CAFF_12',  'vq-byob-gel30-caffeine-energy-gel-1x-copy',          '12 pack',           null],
-  ['GEL50_12',       'gel50-dual-carb-energy-gel-citrus-fruits-copy',       '12 pack',           null],
+  ['GEL50_12',       'gel50-dual-carb-energy-gel-citrus-fruits',            '12 pack',           null],
+
+  // ── Bars ──
   ['BAR30_12',       'bar30-high-carb-rice-energy-bar',                     '12 pack',           null],
   ['BAR50_6',        'bar50-variety-pack-energy-bars',                      '6 pack',            'byob-high-carb-bars'],
   ['BAR50_12',       'bar50-variety-pack-energy-bars',                      '12 pack',           'byob-high-carb-bars'],
+
+  // ── SLT07 500mg ──
   ['SLT07_500_T12',  'slt07-hydration-tablets-mild-berry-500mg',            'Tube of 12',        null],
   ['SLT07_500_B3',   'slt07-hydration-tablets-mild-berry-500mg',            'Box of 3',          null],
   ['SLT07_500_B6',   'slt07-hydration-tablets-mild-berry-500mg',            'Box of 6',          null],
+
+  // ── SLT07 1000mg ──
   ['SLT07_1000_T12', 'slt07-hydration-tablets-mild-citrus',                 'Tube of 12',        null],
   ['SLT07_1000_B3',  'slt07-hydration-tablets-mild-citrus',                 'Box of 3',          null],
   ['SLT07_1000_B6',  'slt07-hydration-tablets-mild-citrus',                 'Box of 6',          null],
+
+  // ── SLT+ ──
   ['SLTPLUS_30',     'slt-plus',                                            'Box (30 servings)', null],
 ];
 
@@ -69,9 +81,9 @@ async function run() {
 
   // ── 2. Selling plan — fill in manually from Recharge portal ──
   const BYOB_SELLING_PLAN = 'FILL_ME_IN';
-  console.log('→ Skipping selling plan — fill in manually from Recharge portal (see README).\n');
+  console.log('→ Skipping selling plan — fill in manually from Recharge portal.\n');
 
-  // ── 3. Product + collection helpers ──
+  // ── 3. Helpers ──
   const productCache    = {};
   const collectionCache = {};
 
@@ -97,6 +109,7 @@ async function run() {
     const needle = packOptionText.toLowerCase();
     if (!product) return null;
     return (
+      product.variants.find((v) => v.title.toLowerCase() === needle) ||
       product.variants.find((v) => v.title.toLowerCase().includes(needle)) ||
       product.variants.find((v) =>
         Object.values(v).some((x) => typeof x === 'string' && x.toLowerCase().includes(needle))
@@ -141,8 +154,8 @@ async function run() {
  * Generated: ${new Date().toISOString()}
  * Store: ${STORE}
  *
- * BYOB_SELLING_PLAN: get this from Recharge merchant portal
- *   → Subscriptions → Selling plans → click your Subscribe & Save plan → copy the ID from the URL
+ * BYOB_SELLING_PLAN: get from Recharge merchant portal
+ *   → Subscriptions → Selling plans → click your Subscribe & Save plan → copy ID from URL
  */
 
 window.STYRKR_VARIANT_MAP = {
@@ -167,7 +180,7 @@ ${Object.entries(resolvedPacks)
 
   const notFound = Object.entries(resolvedPacks).filter(([, v]) => Object.values(v).includes('NOT_FOUND'));
   if (notFound.length > 0) {
-    console.warn('\n⚠ The following packs have NOT_FOUND entries — fix manually:');
+    console.warn('\n⚠ NOT_FOUND entries — fix manually:');
     notFound.forEach(([pk]) => console.warn('  -', pk));
   } else {
     console.log('✓ All packs resolved successfully.');
